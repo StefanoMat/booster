@@ -1,5 +1,14 @@
 mode: set
-github.com/stefanoMat/boost/bank_account.go:5.55,8.2 2 1
-github.com/stefanoMat/boost/bank_account.go:10.65,11.22 1 1
-github.com/stefanoMat/boost/bank_account.go:11.22,13.3 1 1
-github.com/stefanoMat/boost/bank_account.go:14.2,15.21 2 1
+github.com/stefanoMat/boost/bank_account.go:9.95,12.16 3 1
+github.com/stefanoMat/boost/bank_account.go:12.16,14.3 1 1
+github.com/stefanoMat/boost/bank_account.go:15.2,15.21 1 1
+github.com/stefanoMat/boost/bank_account.go:18.65,19.22 1 1
+github.com/stefanoMat/boost/bank_account.go:19.22,21.3 1 1
+github.com/stefanoMat/boost/bank_account.go:22.2,23.21 2 1
+github.com/stefanoMat/boost/bank_account_repository.go:12.66,14.2 1 1
+github.com/stefanoMat/boost/bank_account_repository.go:16.75,18.16 2 1
+github.com/stefanoMat/boost/bank_account_repository.go:18.16,20.3 1 0
+github.com/stefanoMat/boost/bank_account_repository.go:21.2,23.16 3 1
+github.com/stefanoMat/boost/bank_account_repository.go:23.16,25.3 1 0
+github.com/stefanoMat/boost/bank_account_repository.go:26.2,26.12 1 1
+github.com/stefanoMat/boost/repository_mock.go:11.75,14.2 2 1

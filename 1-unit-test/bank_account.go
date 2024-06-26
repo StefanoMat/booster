@@ -3,12 +3,12 @@ package bank
 import "errors"
 
 type Repository interface {
-	SaveAccount(balance float64) error
+	SaveDeposit(accountId int, amount float64) error
 }
 
-func Deposit(amount float64, balance float64, repository Repository) (float64, error) {
+func Deposit(id int, amount float64, balance float64, repository Repository) (float64, error) {
 	balance += amount
-	err := repository.SaveAccount(balance)
+	err := repository.SaveDeposit(id, amount)
 	if err != nil {
 		return 0.0, err
 	}

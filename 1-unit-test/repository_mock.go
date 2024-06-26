@@ -8,7 +8,7 @@ type AccountRepositoryMock struct {
 	mock.Mock
 }
 
-func (m *AccountRepositoryMock) SaveAccount(balance float64) error {
-	args := m.Called(balance)
+func (m *AccountRepositoryMock) SaveDeposit(id int, amount float64) error {
+	args := m.Called(id, amount)
 	return args.Error(0)
 }
