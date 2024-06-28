@@ -31,9 +31,21 @@ type AddressViaCep struct {
 
 func main() {
 	r := chi.NewRouter()
+	//----//
 	r.Use(middleware.DefaultLogger)
-	r.Get("/api/cep/{cep}", GetCep)
-	http.ListenAndServe(":3000", r)
+	r.Use(middleware.Heartbeat("/health"))
+
+	r.Route("/api/cep", func(r chi.Router) {
+		r.Get("/{cep}", GetCep)
+	})
+
+	//----//
+	println("ListenAndServe: Inicializando servidor na porta 3000")
+	err := http.ListenAndServe(":3000", r)
+	if err != nil {
+		println("ListenAndServe: Erro ao iniciar o servidor")
+		panic(err)
+	}
 }
 
 func GetCep(rw http.ResponseWriter, r *http.Request) {
@@ -41,6 +53,16 @@ func GetCep(rw http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(ctx, 800*time.Millisecond)
 	defer cancel()
+	//Verificar se o CEP consultado existe na nossa base de dados.
+	// Se existir: Retornar os dados do CEP da base.
+	// Se nao existir:
+	//Salvar em uma tabela do banco de dados chamada address | id int-primary key, cep - unique-not null, logradouro - string, complemento-string, bairro-string, localidade- string - not null, uf string-not null
+
+	//sqlite3
+	//mysql no docker
+	//Repository
+	//Consultar módulo 1 para ver sqlite e queries SQL.
+
 	address, err := BuscaCEP(cep, ctx)
 	if err != nil {
 		panic(err)
