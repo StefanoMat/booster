@@ -58,8 +58,7 @@ func GetCep(rw http.ResponseWriter, r *http.Request) {
 	// Se nao existir:
 	//Salvar em uma tabela do banco de dados chamada address | id int-primary key, cep - unique-not null, logradouro - string, complemento-string, bairro-string, localidade- string - not null, uf string-not null
 
-	//sqlite3
-	//mysql no docker
+	//sqlite3 local ou mysql no docker
 	//Repository
 	//Consultar módulo 1 para ver sqlite e queries SQL.
 
