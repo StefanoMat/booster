@@ -3,12 +3,18 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/stefanoMat/boost/entity"
+	"github.com/stefanoMat/boost/repository"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
 type AddressViaCep struct {
@@ -29,19 +35,29 @@ type AddressViaCep struct {
 // 	return fmt.Sprintf("%s, %s - %s, %s", a.Logradouro, a.Localidade, a.Uf, a.Bairro)
 // }
 
+var db *gorm.DB
+
 func main() {
+	var err error
+	db, err = gorm.Open(sqlite.Open("consulta.db"), &gorm.Config{})
+	if err != nil {
+		panic(err)
+	}
+	db.AutoMigrate(&entity.Address{})
+
 	r := chi.NewRouter()
 	//----//
 	r.Use(middleware.DefaultLogger)
 	r.Use(middleware.Heartbeat("/health"))
 
 	r.Route("/api/cep", func(r chi.Router) {
+		r.Get("/", GetCeps)
 		r.Get("/{cep}", GetCep)
 	})
 
 	//----//
 	println("ListenAndServe: Inicializando servidor na porta 3000")
-	err := http.ListenAndServe(":3000", r)
+	err = http.ListenAndServe(":3000", r)
 	if err != nil {
 		println("ListenAndServe: Erro ao iniciar o servidor")
 		panic(err)
@@ -51,26 +67,74 @@ func main() {
 func GetCep(rw http.ResponseWriter, r *http.Request) {
 	cep := chi.URLParam(r, "cep")
 	ctx := context.Background()
-	ctx, cancel := context.WithTimeout(ctx, 800*time.Millisecond)
+	ctx, cancel := context.WithTimeout(ctx, 900*time.Millisecond)
 	defer cancel()
-	//Verificar se o CEP consultado existe na nossa base de dados.
-	// Se existir: Retornar os dados do CEP da base.
-	// Se nao existir:
-	//Salvar em uma tabela do banco de dados chamada address | id int-primary key, cep - unique-not null, logradouro - string, complemento-string, bairro-string, localidade- string - not null, uf string-not null
 
-	//sqlite3 local ou mysql no docker
-	//Repository
-	//Consultar módulo 1 para ver sqlite e queries SQL.
+	addressFind, err := repository.NewAddress(db).GetByCep(cep)
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		rw.WriteHeader(http.StatusInternalServerError)
+		rw.Write([]byte(err.Error()))
+		return
+	}
+
+	if addressFind != nil {
+		println("Encontrado no banco de dados")
+		rw.Header().Set("Content-Type", "application/json")
+		rw.WriteHeader(http.StatusOK)
+		err = json.NewEncoder(rw).Encode(addressFind)
+		if err != nil {
+			rw.WriteHeader(http.StatusInternalServerError)
+			rw.Write([]byte(err.Error()))
+		}
+		return
+	}
 
 	address, err := BuscaCEP(cep, ctx)
 	if err != nil {
 		panic(err)
 	}
+	addressEntity := entity.NewAddress(address.Cep, address.Logradouro, address.Complemento, address.Bairro, address.Localidade, address.Uf)
+	err = repository.NewAddress(db).Create(addressEntity)
+	if err != nil {
+		rw.WriteHeader(http.StatusInternalServerError)
+		rw.Write([]byte(err.Error()))
+		return
+	}
+	rw.Header().Set("Content-Type", "application/json")
+	rw.WriteHeader(http.StatusOK)
 	err = json.NewEncoder(rw).Encode(address)
 	if err != nil {
 		panic(err)
 	}
 }
+
+func GetCeps(rw http.ResponseWriter, r *http.Request) {
+	page := r.URL.Query().Get("page")
+	limit := r.URL.Query().Get("limit")
+	sort := r.URL.Query().Get("sort")
+
+	pageInt, err := strconv.Atoi(page)
+	if err != nil {
+		pageInt = 0
+	}
+	limitInt, err := strconv.Atoi(limit)
+	if err != nil {
+		limitInt = 0
+	}
+
+	addresses, err := repository.NewAddress(db).FindAll(pageInt, limitInt, sort)
+	if err != nil {
+		rw.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	rw.Header().Set("Content-Type", "application/json")
+	rw.WriteHeader(http.StatusOK)
+
+	json.NewEncoder(rw).Encode(addresses)
+
+}
+
 func BuscaCEP(cep string, ctx context.Context) (*AddressViaCep, error) {
 	req, err := http.NewRequestWithContext(ctx, "GET", "https://viacep.com.br/ws/"+cep+"/json/", nil)
 	if err != nil {
