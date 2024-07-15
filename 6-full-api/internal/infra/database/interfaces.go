@@ -9,3 +9,8 @@ type ProductInterface interface {
 	Update(product *entity.Product) error
 	Delete(id string) error
 }
+
+type UserInterface interface {
+	Create(user *entity.User) error
+	FindByEmail(email string) (*entity.User, error)
+}
