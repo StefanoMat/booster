@@ -7,13 +7,25 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/jwtauth"
 	"github.com/stefanoMat/boost/6-full-api/configs"
+	_ "github.com/stefanoMat/boost/6-full-api/docs"
 	"github.com/stefanoMat/boost/6-full-api/internal/entity"
 	"github.com/stefanoMat/boost/6-full-api/internal/infra/database"
 	"github.com/stefanoMat/boost/6-full-api/internal/webserver/handlers"
+	httpSwagger "github.com/swaggo/http-swagger"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
+// @title Product API Booster
+// @version 0.1
+// @description Product API developed on Booster program
+// @contact.name Stefano Kaefer
+
+// @host localhost:8000
+// @BasePath /
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
 func main() {
 	config, err := configs.Load(".")
 	if err != nil {
@@ -47,6 +59,8 @@ func main() {
 
 	r.Post("/users", userHandler.CreateUser)
 	r.Post("/users/token", userHandler.GetJWT)
+
+	r.Get("/docs/*", httpSwagger.Handler(httpSwagger.URL("/docs/doc.json")))
 
 	http.ListenAndServe(":8000", r)
 

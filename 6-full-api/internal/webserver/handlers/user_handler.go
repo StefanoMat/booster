@@ -21,6 +21,16 @@ func NewUserHandler(userDB database.UserInterface, tokenAuth *jwtauth.JWTAuth, j
 	return &UserHandler{UserDB: userDB, TokenAuth: tokenAuth, JWTExpiresIn: jwtExpiresIn}
 }
 
+// Create User doc
+// @Summary Create User
+// @Description Create User in the api
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param user body dto.CreateUserInput true "Create User"
+// @Success 201 {object} entity.User
+// @Failure 500
+// @Router /users [post]
 func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var user dto.CreateUserInput
 	err := json.NewDecoder(r.Body).Decode(&user)
@@ -43,6 +53,17 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(userEntity)
 }
 
+// Get JWT doc
+// @Summary Get JWT
+// @Description Get Token JWT
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param request body dto.GetJWTInput true "Get JWT"
+// @Success 200 {object} dto.GetJWTOutput
+// @Failure 404
+// @Failure 500
+// @Router /users/token [post]
 func (h *UserHandler) GetJWT(w http.ResponseWriter, r *http.Request) {
 
 	var user dto.GetJWTInput

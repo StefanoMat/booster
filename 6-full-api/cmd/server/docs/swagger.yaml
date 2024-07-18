@@ -1,0 +1,15 @@
+basePath: /
+host: localhost:8000
+info:
+  contact:
+    name: Stefano Kaefer
+  description: Product API developed on Booster program
+  title: Product API Booster
+  version: "0.1"
+paths: {}
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

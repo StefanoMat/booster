@@ -18,6 +18,17 @@ func NewProductHandler(productDB database.ProductInterface) *ProductHandler {
 	return &ProductHandler{ProductDB: productDB}
 }
 
+// Create product doc
+// @Summary Create product
+// @Description Create product in the api
+// @Tags products
+// @Accept json
+// @Produce json
+// @Param product body dto.CreateProductInput true "Create product"
+// @Success 201 {object} entity.Product
+// @Failure 500
+// @Security ApiKeyAuth
+// @Router /products [post]
 func (h *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	var product dto.CreateProductInput
 	err := json.NewDecoder(r.Body).Decode(&product)
